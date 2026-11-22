@@ -85,6 +85,9 @@ class SaleController extends Controller
 
     public function void(Request $request, int $id): JsonResponse
     {
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'min:3', 'max:1000'],
+        ]);
         $sale = Sale::findOrFail($id);
 
         if ($request->user()->isCashier()) {
@@ -95,7 +98,7 @@ class SaleController extends Controller
         }
 
         try {
-            $sale = $this->saleService->void($sale, $request->user());
+            $sale = $this->saleService->void($sale, $request->user(), $validated['reason']);
         } catch (\RuntimeException $e) {
             return response()->json([
                 'success' => false,

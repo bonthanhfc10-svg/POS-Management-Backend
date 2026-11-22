@@ -123,9 +123,10 @@ class SaleTest extends TestCase
         $this->assertEquals(6, $this->product->fresh()->stock_quantity);
 
         $this->actingAs($manager)
-            ->postJson("/api/sales/{$saleId}/void")
+            ->postJson("/api/sales/{$saleId}/void", ['reason' => 'Customer requested cancellation'])
             ->assertStatus(200)
-            ->assertJsonPath('data.status', 'voided');
+            ->assertJsonPath('data.status', 'voided')
+            ->assertJsonPath('data.void_reason', 'Customer requested cancellation');
 
         $this->assertEquals(10, $this->product->fresh()->stock_quantity);
 
@@ -151,7 +152,7 @@ class SaleTest extends TestCase
         $saleId = $saleResponse->json('data.id');
 
         $this->actingAs($cashier)
-            ->postJson("/api/sales/{$saleId}/void")
+            ->postJson("/api/sales/{$saleId}/void", ['reason' => 'Not authorized'])
             ->assertStatus(403);
     }
 

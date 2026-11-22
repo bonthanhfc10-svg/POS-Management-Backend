@@ -24,7 +24,6 @@ class SaleService
      * @param array{
      *     items: array<int, array{product_id: int, quantity: int}>,
      *     discount?: float|int|string,
-     *     tax?: float|int|string,
      *     payment_method: string,
      *     tendered?: float|int|string|null,
      *     notes?: string|null
@@ -67,7 +66,8 @@ class SaleService
             }
 
             $discount = min((float) ($data['discount'] ?? 0), $subtotal);
-            $tax = (float) ($data['tax'] ?? 0);
+            $taxRate = max(0, (float) SystemSetting::getValue('tax_rate', 0));
+            $tax = round(($subtotal - $discount) * $taxRate / 100, 2);
             $total = round($subtotal - $discount + $tax, 2);
 
             $sale = Sale::create([
@@ -126,13 +126,13 @@ class SaleService
     /**
      * Void a sale and restore stock inside a DB transaction.
      */
-    public function void(Sale $sale, User $actor): Sale
+    public function void(Sale $sale, User $actor, string $reason): Sale
     {
         if ($sale->status === Sale::STATUS_VOIDED) {
             throw new \RuntimeException('Sale is already voided.');
         }
 
-        return DB::transaction(function () use ($sale, $actor) {
+        return DB::transaction(function () use ($sale, $actor, $reason) {
             $sale = Sale::whereKey($sale->id)->lockForUpdate()->firstOrFail();
 
             if ($sale->status === Sale::STATUS_VOIDED) {
@@ -156,6 +156,7 @@ class SaleService
                 'status' => Sale::STATUS_VOIDED,
                 'voided_by' => $actor->id,
                 'voided_at' => now(),
+                'void_reason' => $reason,
             ]);
 
             return $sale->fresh(['items', 'payment', 'user', 'voidedBy']);

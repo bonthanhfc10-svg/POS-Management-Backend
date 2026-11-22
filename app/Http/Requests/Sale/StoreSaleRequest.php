@@ -19,7 +19,6 @@ class StoreSaleRequest extends FormRequest
             'items.*.product_id' => ['required', 'integer', 'exists:products,id'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'discount' => ['sometimes', 'numeric', 'min:0'],
-            'tax' => ['sometimes', 'numeric', 'min:0'],
             'payment_method' => ['required', Rule::in(['cash', 'card', 'mobile'])],
             'tendered' => ['required_if:payment_method,cash', 'nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string', 'max:1000'],

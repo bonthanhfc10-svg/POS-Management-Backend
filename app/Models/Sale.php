@@ -25,6 +25,7 @@ class Sale extends Model
         'status',
         'voided_by',
         'voided_at',
+        'void_reason',
         'notes',
     ];
 

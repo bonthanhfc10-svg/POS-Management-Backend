@@ -38,6 +38,7 @@ class SystemSettingController extends Controller
         $request->validate([
             'settings' => ['required', 'array'],
             'settings.*' => ['nullable', 'string', 'max:2000'],
+            'settings.tax_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
         ]);
 
         $settings = $request->validated('settings');
