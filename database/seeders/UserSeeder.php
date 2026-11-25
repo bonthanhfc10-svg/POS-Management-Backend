@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -37,7 +38,7 @@ class UserSeeder extends Seeder
                 [
                     'name' => $user['name'],
                     'password' => Hash::make($user['password']),
-                    'role' => $user['role'],
+                    'role_id' => Role::where('code', $user['role'])->value('id'),
                 ]
             );
         }

@@ -24,7 +24,7 @@ class UserController extends Controller
         }
 
         if ($role = $request->query('role')) {
-            $query->where('role', $role);
+            $query->whereHas('roleRecord', fn ($q) => $q->where('code', $role));
         }
 
         $users = $query->orderBy('name')

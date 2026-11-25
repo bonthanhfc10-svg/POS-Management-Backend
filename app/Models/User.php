@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -27,6 +28,9 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'role_id',
+        'staff_id',
+        'username',
     ];
 
     /**
@@ -51,6 +55,21 @@ class User extends Authenticatable
     public function sales(): HasMany
     {
         return $this->hasMany(Sale::class);
+    }
+
+    public function roleRecord(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }
+
+    public function getRoleAttribute(): ?string
+    {
+        return $this->roleRecord?->code;
+    }
+
+    public function setRoleAttribute(string $role): void
+    {
+        $this->attributes['role_id'] = Role::where('code', $role)->value('id');
     }
 
     public function isAdmin(): bool
