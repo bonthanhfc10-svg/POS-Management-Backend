@@ -10,22 +10,29 @@ return new class extends Migration
     {
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('code')->unique();
+            $table->string('name', 100);
+            $table->string('code', 50)->unique();
+            $table->text('description')->nullable();
+            $table->boolean('status')->default(true);
             $table->timestamps();
         });
 
         Schema::create('permissions', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('code')->unique();
+            $table->string('name', 100);
+            $table->string('code', 100)->unique();
+            $table->string('module', 100)->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
         });
 
         Schema::create('role_permissions', function (Blueprint $table) {
-            $table->foreignId('role_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('permission_id')->constrained()->cascadeOnDelete();
+            $table->unsignedBigInteger('role_id');
+            $table->unsignedBigInteger('permission_id');
             $table->primary(['role_id', 'permission_id']);
+            $table->foreign('role_id')->references('id')->on('roles');
+            $table->foreign('permission_id')->references('id')->on('permissions');
+            $table->index('permission_id', 'role_permissions_permission_idx');
         });
     }
 
