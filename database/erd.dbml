@@ -1,0 +1,345 @@
+// POS Management System ERD
+// Paste this file into https://dbdiagram.io/d to render the diagram.
+
+Table roles {
+  id bigserial [pk]
+  name varchar(100)
+  code varchar(50) [unique]
+  description text
+  status boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table permissions {
+  id bigserial [pk]
+  name varchar(100)
+  code varchar(100) [unique]
+  module varchar(100)
+  description text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table role_permissions {
+  role_id bigint [pk]
+  permission_id bigint [pk]
+}
+
+Table users {
+  id bigserial [pk]
+  role_id bigint
+  staff_id varchar(30) [unique]
+  full_name varchar(150)
+  username varchar(100) [unique]
+  email varchar(150) [unique]
+  phone varchar(30)
+  password varchar
+  profile_image varchar
+  status boolean
+  email_verified_at timestamp
+  remember_token varchar(100)
+  last_login_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table categories {
+  id bigserial [pk]
+  code varchar(30) [unique]
+  name varchar(150)
+  description text
+  status boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table products {
+  id bigserial [pk]
+  category_id bigint
+  sku varchar(50) [unique]
+  barcode varchar(100) [unique]
+  name varchar(200)
+  brand varchar(100)
+  description text
+  image varchar
+  cost_price decimal(14,4)
+  selling_price decimal(12,2)
+  stock_qty int
+  min_stock_qty int
+  warranty_months int
+  specifications jsonb
+  status boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table suppliers {
+  id bigserial [pk]
+  supplier_code varchar(30) [unique]
+  name varchar(150)
+  contact_person varchar(150)
+  phone varchar(30)
+  email varchar(150)
+  address text
+  note text
+  status boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table customers {
+  id bigserial [pk]
+  customer_code varchar(30) [unique]
+  full_name varchar(150)
+  phone varchar(30)
+  email varchar(150)
+  address text
+  note text
+  status boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table purchases {
+  id bigserial [pk]
+  supplier_id bigint
+  user_id bigint
+  purchase_no varchar(50) [unique]
+  supplier_invoice_no varchar(100)
+  purchase_date timestamp
+  subtotal decimal(12,2)
+  discount_amount decimal(12,2)
+  grand_total decimal(12,2)
+  status varchar(20)
+  received_at timestamp
+  received_by bigint
+  note text
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    (supplier_id, supplier_invoice_no) [unique]
+  }
+}
+
+Table purchase_items {
+  id bigserial [pk]
+  purchase_id bigint
+  product_id bigint
+  product_name varchar(200)
+  product_sku varchar(50)
+  quantity int
+  unit_cost decimal(12,2)
+  line_total decimal(12,2)
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    (purchase_id, product_id) [unique]
+  }
+}
+
+Table sales {
+  id bigserial [pk]
+  user_id bigint
+  customer_id bigint
+  invoice_no varchar(50) [unique]
+  checkout_key varchar(100) [unique]
+  sale_date timestamp
+  subtotal decimal(12,2)
+  discount_amount decimal(12,2)
+  tax_rate decimal(5,2)
+  tax_amount decimal(12,2)
+  grand_total decimal(12,2)
+  currency char(3)
+  status varchar(20)
+  reservation_expires_at timestamp
+  note text
+  voided_by bigint
+  voided_at timestamp
+  void_reason text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table sale_items {
+  id bigserial [pk]
+  sale_id bigint
+  product_id bigint
+  product_name varchar(200)
+  product_sku varchar(50)
+  quantity int
+  unit_price decimal(12,2)
+  unit_cost decimal(14,4)
+  warranty_months int
+  line_total decimal(12,2)
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    (sale_id, product_id) [unique]
+  }
+}
+
+Table payments {
+  id bigserial [pk]
+  sale_id bigint
+  payment_method varchar(20)
+  amount_due decimal(12,2)
+  amount_paid decimal(12,2)
+  cash_received decimal(12,2)
+  change_amount decimal(12,2)
+  payment_status varchar(20)
+  provider varchar(50)
+  transaction_ref varchar(150) [unique]
+  provider_transaction_id varchar(150)
+  qr_payload text
+  qr_md5 varchar(32)
+  expires_at timestamp
+  paid_at timestamp
+  refund_ref varchar(150)
+  refunded_at timestamp
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    (provider, provider_transaction_id) [unique]
+  }
+}
+
+Table stock_movements {
+  id bigserial [pk]
+  product_id bigint
+  user_id bigint
+  sale_id bigint
+  purchase_id bigint
+  movement_type varchar(20)
+  quantity int
+  stock_before int
+  stock_after int
+  reason varchar(150)
+  note text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table settings {
+  id bigint [pk, note: 'Always 1; singleton store configuration']
+  store_name varchar(150)
+  store_logo varchar
+  address text
+  phone varchar(30)
+  email varchar(150)
+  currency char(3)
+  tax_enabled boolean
+  tax_rate decimal(5,2)
+  invoice_prefix varchar(20)
+  receipt_header text
+  receipt_footer text
+  timezone varchar(100)
+  updated_by bigint
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table notification_settings {
+  id bigserial [pk]
+  user_id bigint [unique]
+  telegram_chat_id varchar(50)
+  telegram_enabled boolean
+  low_stock_alert boolean
+  out_of_stock_alert boolean
+  daily_sales_report boolean
+  payment_alert boolean
+  void_sale_alert boolean
+  stock_adjustment_alert boolean
+  purchase_alert boolean
+  stock_received_alert boolean
+  daily_purchase_report boolean
+  report_time time
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table notification_logs {
+  id bigserial [pk]
+  user_id bigint
+  product_id bigint
+  sale_id bigint
+  purchase_id bigint
+  type varchar(50)
+  channel varchar(20)
+  recipient varchar(100)
+  title varchar(200)
+  message text
+  status varchar(20)
+  event_key varchar(150)
+  error_message text
+  sent_at timestamp
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    (event_key, recipient) [unique]
+  }
+}
+
+Table password_reset_tokens {
+  email varchar(150) [pk]
+  token varchar
+  created_at timestamp
+}
+
+Table personal_access_tokens {
+  id bigserial [pk]
+  tokenable_type varchar
+  tokenable_id bigint
+  name text
+  token varchar(64) [unique]
+  abilities text
+  last_used_at timestamp
+  expires_at timestamp
+  created_at timestamp
+  updated_at timestamp
+
+  indexes {
+    (tokenable_type, tokenable_id)
+  }
+}
+
+Table failed_jobs {
+  id bigserial [pk]
+  uuid varchar [unique]
+  connection text
+  queue text
+  payload text
+  exception text
+  failed_at timestamp
+}
+
+Ref: role_permissions.role_id > roles.id
+Ref: role_permissions.permission_id > permissions.id
+Ref: users.role_id > roles.id
+Ref: products.category_id > categories.id
+Ref: purchases.supplier_id > suppliers.id
+Ref: purchases.user_id > users.id
+Ref: purchases.received_by > users.id
+Ref: purchase_items.purchase_id > purchases.id
+Ref: purchase_items.product_id > products.id
+Ref: sales.user_id > users.id
+Ref: sales.customer_id > customers.id
+Ref: sales.voided_by > users.id
+Ref: sale_items.sale_id > sales.id
+Ref: sale_items.product_id > products.id
+Ref: payments.sale_id > sales.id
+Ref: stock_movements.product_id > products.id
+Ref: stock_movements.user_id > users.id
+Ref: stock_movements.sale_id > sales.id
+Ref: stock_movements.purchase_id > purchases.id
+Ref: settings.updated_by > users.id
+Ref: notification_settings.user_id > users.id
+Ref: notification_logs.user_id > users.id
+Ref: notification_logs.product_id > products.id
+Ref: notification_logs.sale_id > sales.id
+Ref: notification_logs.purchase_id > purchases.id

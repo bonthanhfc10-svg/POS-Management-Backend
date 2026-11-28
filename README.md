@@ -83,6 +83,7 @@ Voiding records the actor, timestamp, reason, and stock restoration movement.
 
 - API routes are in `routes/api.php`.
 - Migrations, seeders, and factories are in `database/`.
+- The database ERD source is `database/erd.dbml`. Paste it into [dbdiagram.io](https://dbdiagram.io/d) to render or export the diagram. Update it when migrations change.
 - Feature tests are in `tests/Feature/`.
 - Run the test suite with `php artisan test`.
 - Configure `tax_rate` as a percentage from 0 to 100. Keep `.env` and production credentials private.
