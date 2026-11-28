@@ -14,20 +14,24 @@ class UserController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = User::query();
+        $query = User::with('roleRecord');
 
         if ($search = $request->query('search')) {
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
+                $q->where('full_name', 'like', "%{$search}%")
+                    ->orWhere('username', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
         if ($role = $request->query('role')) {
-            $query->whereHas('roleRecord', fn ($q) => $q->where('code', $role));
+            $query->whereHas(
+                'roleRecord',
+                fn ($q) => $q->where('code', $role)
+            );
         }
 
-        $users = $query->orderBy('name')
+        $users = $query->orderBy('full_name')
             ->paginate($request->integer('per_page', 15));
 
         return response()->json([
@@ -38,17 +42,17 @@ class UserController extends Controller
 
     public function store(StoreUserRequest $request): JsonResponse
     {
-        $user = User::create([
-            'name' => $request->validated('name'),
-            'email' => $request->validated('email'),
-            'password' => Hash::make($request->validated('password')),
-            'role' => $request->validated('role'),
-        ]);
+        $data = $request->validated();
+
+        $data['password'] = Hash::make($data['password']);
+        $data['status'] = $data['status'] ?? true;
+
+        $user = User::create($data);
 
         return response()->json([
             'success' => true,
             'message' => 'User created successfully.',
-            'data' => $user,
+            'data' => $user->load('roleRecord'),
         ], 201);
     }
 
@@ -68,7 +72,7 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'User updated successfully.',
-            'data' => $user,
+            'data' => $user->load('roleRecord'),
         ]);
     }
 

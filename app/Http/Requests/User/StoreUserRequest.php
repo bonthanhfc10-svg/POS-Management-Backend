@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\User;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StoreUserRequest extends FormRequest
 {
@@ -15,10 +14,48 @@ class StoreUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8'],
-            'role' => ['required', Rule::in(['admin', 'manager', 'cashier'])],
+            'role_id' => [
+                'required',
+                'integer',
+                'exists:roles,id',
+            ],
+            'staff_id' => [
+                'required',
+                'string',
+                'max:30',
+                'unique:users,staff_id',
+            ],
+            'full_name' => [
+                'required',
+                'string',
+                'max:150',
+            ],
+            'username' => [
+                'required',
+                'string',
+                'max:100',
+                'unique:users,username',
+            ],
+            'email' => [
+                'required',
+                'email',
+                'max:150',
+                'unique:users,email',
+            ],
+            'phone' => [
+                'nullable',
+                'string',
+                'max:30',
+            ],
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+            ],
+            'status' => [
+                'sometimes',
+                'boolean',
+            ],
         ];
     }
 }
